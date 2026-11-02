@@ -110,7 +110,7 @@
 
   /* ================= NO button ================= */
   var messages = ['pagdali', '1k nana dayun', 'bless and love brader', 'gaya oi',
-    '1k nana ba', 'yes na dayun oi bogo', 'donate na dira'];
+    '1k nana ba', 'yes na dayun oi', 'donate na dira'];
   var lastMsg = -1, moved = false, answered = false, lastEscape = 0, bubbleTimer;
   var MARGIN = 8, EDGE = 16;
 
