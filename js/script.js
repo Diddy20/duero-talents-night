@@ -7,7 +7,7 @@
 
   var welcome = $('welcome'), buttons = $('buttons');
   var yesBtn = $('yesBtn'), yesWrap = $('yesWrap');
-  var noBtn = $('noBtn'), noWrap = $('noWrap'), bubble = $('noBubble');
+  var noBtn = $('noBtn'), noWrap = $('noWrap');
   var thanks = $('thanks'), canvas = $('confetti');
   var letterSection = $('letter-section');
 
@@ -108,47 +108,58 @@
     }
   })();
 
-  /* ================= NO button: Bible verses + YES growth ================= */
-  var verses = [
-    ['It is more blessed to give than to receive.', 'Acts 20:35'],
-    ['Give, and it shall be given unto you.', 'Luke 6:38'],
-    ['He which soweth bountifully shall reap also bountifully.', '2 Corinthians 9:6'],
-    ['Honour the LORD with thy substance, and with the firstfruits of all thine increase.', 'Proverbs 3:9'],
-    ['But to do good and to communicate forget not: for with such sacrifices God is well pleased.', 'Hebrews 13:16'],
-    ['For all things come of thee, and of thine own have we given thee.', '1 Chronicles 29:14'],
-    ['God loveth a cheerful giver.', '2 Corinthians 9:7']
-  ];
-  var verseIdx = 0, answered = false, bubbleTimer;
-  var verseText = document.createElement('span'), verseRef = document.createElement('span');
-  verseText.className = 'verse-text';
-  verseRef.className = 'verse-ref';
-  bubble.appendChild(verseText);
-  bubble.appendChild(verseRef);
+  /* ================= NO button: moves only when clicked ================= */
+  var answered = false, moved = false;
+  var EDGE = 16, GAP = 20;
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
-  function showVerse() {
-    var v = verses[verseIdx];
-    verseIdx = (verseIdx + 1) % verses.length;
-    bubble.classList.remove('show');
-    verseText.textContent = v[0];
-    verseRef.textContent = v[1];
-    if (window.innerWidth <= 600) {
-      bubble.style.top = '16px';
-    } else {
-      bubble.style.top = (buttons.getBoundingClientRect().bottom + 16) + 'px';
+  function startMoving() {
+    if (moved) return;
+    moved = true;
+    var r = noBtn.getBoundingClientRect();
+    noWrap.style.width = r.width + 'px';   // keep the layout slot so YES does not shift
+    noWrap.style.height = r.height + 'px';
+    noBtn.classList.add('moving');
+    noBtn.style.left = r.left + 'px';
+    noBtn.style.top = r.top + 'px';
+    welcome.appendChild(noBtn);            // outside the card so position:fixed uses the viewport
+    void noBtn.offsetWidth;
+  }
+
+  function placeNo() {
+    var w = noBtn.offsetWidth, h = noBtn.offsetHeight;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var minX = EDGE, minY = EDGE;
+    var maxX = Math.max(minX, vw - w - EDGE), maxY = Math.max(minY, vh - h - EDGE);
+    var y = yesRect();
+    function fits(x, yy) {
+      return x + w + GAP <= y.left || x >= y.right + GAP || yy + h + GAP <= y.top || yy >= y.bottom + GAP;
     }
-    bubble.style.left = '50%';
-    void bubble.offsetWidth;
-    bubble.classList.add('show');
-    clearTimeout(bubbleTimer);
-    bubbleTimer = setTimeout(function () { bubble.classList.remove('show'); }, 3000);
+    var i, x, yy;
+    for (i = 0; i < 20; i++) {
+      x = minX + Math.random() * (maxX - minX);
+      yy = minY + Math.random() * (maxY - minY);
+      if (fits(x, yy)) { setNo(x, yy); return; }
+    }
+    var cx = (y.left + y.right) / 2, cy = (y.top + y.bottom) / 2;   // farthest corner from YES
+    var best = null, bestD = -1, xs = [minX, maxX], ys = [minY, maxY];
+    for (var a = 0; a < 2; a++) for (var b = 0; b < 2; b++) {
+      var d = Math.hypot(xs[a] + w / 2 - cx, ys[b] + h / 2 - cy);
+      if (d > bestD) { bestD = d; best = [xs[a], ys[b]]; }
+    }
+    setNo(best[0], best[1]);
+  }
+  function setNo(x, y) {
+    noBtn.style.left = x + 'px';
+    noBtn.style.top = y + 'px';
   }
 
   noBtn.addEventListener('click', function () {
     if (answered) return;
+    startMoving();
     growYes();
-    showVerse();
+    placeNo();
   });
 
   /* ================= YES button growth ================= */
@@ -170,8 +181,9 @@
       tx = clamp(cx, w / 2 + 4, vw - w / 2 - 4) - cx;
       ty = clamp(cy, h / 2 + 4, vh - h / 2 - 4) - cy;
     }
-    return { tx: tx, ty: ty };
+    return { tx: tx, ty: ty, left: cx + tx - w / 2, top: cy + ty - h / 2, right: cx + tx + w / 2, bottom: cy + ty + h / 2 };
   }
+  function yesRect() { return yesTransform(); }
 
   function applyYes() {
     var t = yesTransform();
@@ -186,7 +198,7 @@
   }
 
   window.addEventListener('resize', function () {
-    if (!answered) { yesScale = Math.min(yesScale, maxScale()); applyYes(); }
+    if (!answered) { yesScale = Math.min(yesScale, maxScale()); applyYes(); if (moved) placeNo(); }
   });
   window.addEventListener('scroll', function () { if (!answered && yesScale > 1) applyYes(); }, { passive: true });
 
@@ -195,8 +207,6 @@
     if (answered) return;
     answered = true;
     tryPlay();
-    bubble.classList.remove('show');
-
     noBtn.classList.add('gone');
     setTimeout(function () { noBtn.remove(); noWrap.remove(); }, 450);
 
