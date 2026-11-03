@@ -12,46 +12,26 @@
   var letterSection = $('letter-section');
 
   /* ================= Music ================= */
-  var bgm = $('bgm'), musicBtn = $('musicBtn');
-  var musicOn = $('musicOn'), musicOff = $('musicOff');
-  var userPaused = false, musicFailed = false;
+  var bgm = $('bgm'), musicFailed = false;
+  var starters = ['pointerdown', 'touchstart', 'keydown', 'click'];
 
-  function setMusicUI(playing) {
-    musicOn.style.display = playing ? '' : 'none';
-    musicOff.style.display = playing ? 'none' : '';
-    musicBtn.setAttribute('aria-pressed', playing ? 'true' : 'false');
-    musicBtn.setAttribute('aria-label', playing ? 'Pause music' : 'Play music');
-  }
-  function failMusic() {
-    musicFailed = true;
-    musicBtn.classList.add('nomusic');
-  }
   function tryPlay() {
-    if (musicFailed || userPaused || !bgm.paused) return;
+    if (musicFailed || !bgm.paused) return;
     try {
       var p = bgm.play();
       if (p && p.catch) p.catch(function () { /* blocked or unavailable: stay silent */ });
     } catch (e) { /* ignore */ }
   }
   bgm.volume = 0.4;
-  bgm.addEventListener('error', failMusic);
-  bgm.addEventListener('play', function () { setMusicUI(true); });
-  bgm.addEventListener('pause', function () { setMusicUI(false); });
-  setMusicUI(false);
+  bgm.addEventListener('error', function () { musicFailed = true; });
 
-  ['pointerdown', 'touchstart', 'keydown', 'click'].forEach(function (ev) {
+  starters.forEach(function (ev) {
     window.addEventListener(ev, function once() {
       tryPlay();
       if (!bgm.paused || musicFailed) {
-        ['pointerdown', 'touchstart', 'keydown', 'click'].forEach(function (e2) { window.removeEventListener(e2, once, true); });
+        starters.forEach(function (e2) { window.removeEventListener(e2, once, true); });
       }
     }, true);
-  });
-  musicBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    if (musicFailed) return;
-    if (bgm.paused) { userPaused = false; tryPlay(); }
-    else { userPaused = true; bgm.pause(); }
   });
 
   /* ================= Background layers ================= */
