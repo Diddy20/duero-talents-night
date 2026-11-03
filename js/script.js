@@ -251,4 +251,34 @@
     }, 200);
   }
 
+  /* ================= GCash copy ================= */
+  var GCASH_NUMBER = '09919855174', copyBtn = $('copyBtn'), copyTimer;
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { /* ignore */ }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function showCopied() {
+    copyBtn.textContent = 'Copied';
+    clearTimeout(copyTimer);
+    copyTimer = setTimeout(function () { copyBtn.textContent = 'Copy Number'; }, 2000);
+  }
+  copyBtn.addEventListener('click', function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(GCASH_NUMBER).then(showCopied, function () {
+        if (fallbackCopy(GCASH_NUMBER)) showCopied();
+      });
+    } else if (fallbackCopy(GCASH_NUMBER)) {
+      showCopied();
+    }
+  });
 })();
