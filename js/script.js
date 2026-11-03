@@ -11,29 +11,6 @@
   var thanks = $('thanks'), canvas = $('confetti');
   var letterSection = $('letter-section');
 
-  /* ================= Music ================= */
-  var bgm = $('bgm'), musicFailed = false;
-  var starters = ['pointerdown', 'touchstart', 'keydown', 'click'];
-
-  function tryPlay() {
-    if (musicFailed || !bgm.paused) return;
-    try {
-      var p = bgm.play();
-      if (p && p.catch) p.catch(function () { /* blocked or unavailable: stay silent */ });
-    } catch (e) { /* ignore */ }
-  }
-  bgm.volume = 0.4;
-  bgm.addEventListener('error', function () { musicFailed = true; });
-
-  starters.forEach(function (ev) {
-    window.addEventListener(ev, function once() {
-      tryPlay();
-      if (!bgm.paused || musicFailed) {
-        starters.forEach(function (e2) { window.removeEventListener(e2, once, true); });
-      }
-    }, true);
-  });
-
   /* ================= Background layers ================= */
   (function layers() {
     var i, el;
@@ -186,7 +163,6 @@
   yesBtn.addEventListener('click', function () {
     if (answered) return;
     answered = true;
-    tryPlay();
     noBtn.classList.add('gone');
     setTimeout(function () { noBtn.remove(); noWrap.remove(); }, 450);
 
