@@ -130,15 +130,15 @@ h1{font-family:var(--serif);font-weight:700;text-transform:uppercase;letter-spac
 .sig-line{margin-bottom:0!important}
 
 /* ---------- GCash ---------- */
-.gcash{position:relative;z-index:1;width:min(420px,100%);margin:44px auto 0;padding:28px 22px;text-align:center;background:var(--navy);border:1px solid var(--gold);border-radius:8px;color:var(--text)}
-.gcash-title{font-family:var(--serif);font-weight:700;color:var(--gold);letter-spacing:.06em;font-size:clamp(1.05rem,4.5vw,1.3rem);line-height:1.3;margin-bottom:18px}
-.gcash-label{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
-.gcash-number{font-size:clamp(1.6rem,8vw,2.2rem);font-weight:700;letter-spacing:.12em;line-height:1.3;margin:4px 0 6px}
-.gcash-name{font-size:1.05rem;margin-bottom:20px}
-.btn-copy{min-height:48px;min-width:160px;padding:12px 30px;border-radius:6px;background:var(--gold);color:#14161b;font-weight:700;font-size:.85rem;letter-spacing:.14em;text-transform:uppercase;box-shadow:0 6px 18px rgba(0,0,0,.35);transition:background .2s}
+.gcash{position:relative;z-index:1;width:min(300px,100%);margin:36px auto 0;padding:1rem 1.25rem;text-align:center;background:var(--navy);border:1px solid var(--gold);border-radius:8px;color:var(--text)}
+.gcash-title{font-family:var(--serif);font-weight:700;color:var(--gold);letter-spacing:.05em;font-size:clamp(.85rem,2.4vw,1rem);line-height:1.3;margin-bottom:.6rem}
+.gcash-label{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;opacity:.8;line-height:1.4}
+.gcash-number{font-size:clamp(1.15rem,4vw,1.4rem);font-weight:700;letter-spacing:.05em;line-height:1.3;margin:2px 0 2px}
+.gcash-name{font-size:.85rem;margin-bottom:.7rem}
+.btn-copy{min-height:44px;min-width:130px;padding:.5rem 1.1rem;border-radius:6px;background:var(--gold);color:#14161b;font-weight:700;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;box-shadow:0 4px 12px rgba(0,0,0,.35);transition:background .2s}
 .btn-copy:hover{background:#e2ba55}
 .btn-copy:focus-visible{outline:3px solid var(--text);outline-offset:3px}
-.gcash-thanks{margin-top:16px;font-size:.8rem;font-style:italic;opacity:.85}
+.gcash-thanks{margin-top:.6rem;font-size:.7rem;font-style:italic;opacity:.85;line-height:1.4}
 
 /* ---------- Footer ---------- */
 .footer{text-align:center;padding:26px 16px 30px;background:#08111d;color:var(--gold);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase}
