@@ -108,150 +108,58 @@
     }
   })();
 
-  /* ================= NO button ================= */
-  var messages = ['pagdali', '1k nana dayun', 'bless and love brader', 'gaya oi',
-    '1k nana ba', 'yes na dayun oi', 'donate na dira'];
-  var lastMsg = -1, moved = false, answered = false, lastEscape = 0, bubbleTimer;
-  var MARGIN = 8, EDGE = 16;
+  /* ================= NO button: Bible verses + YES growth ================= */
+  var verses = [
+    ['It is more blessed to give than to receive.', 'Acts 20:35'],
+    ['Give, and it shall be given unto you.', 'Luke 6:38'],
+    ['He which soweth bountifully shall reap also bountifully.', '2 Corinthians 9:6'],
+    ['Honour the LORD with thy substance, and with the firstfruits of all thine increase.', 'Proverbs 3:9'],
+    ['But to do good and to communicate forget not: for with such sacrifices God is well pleased.', 'Hebrews 13:16'],
+    ['For all things come of thee, and of thine own have we given thee.', '1 Chronicles 29:14'],
+    ['God loveth a cheerful giver.', '2 Corinthians 9:7']
+  ];
+  var verseIdx = 0, answered = false, bubbleTimer;
+  var verseText = document.createElement('span'), verseRef = document.createElement('span');
+  verseText.className = 'verse-text';
+  verseRef.className = 'verse-ref';
+  bubble.appendChild(verseText);
+  bubble.appendChild(verseRef);
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
-  function startMoving() {
-    if (moved) return;
-    moved = true;
-    var r = noBtn.getBoundingClientRect();
-    noWrap.style.width = r.width + 'px';
-    noWrap.style.height = r.height + 'px';
-    noBtn.classList.add('moving');
-    noBtn.style.left = r.left + 'px';
-    noBtn.style.top = r.top + 'px';
-    welcome.appendChild(noBtn); // outside the card so position:fixed is relative to the viewport
-    void noBtn.offsetWidth;
-  }
-
-  function showBubble() {
-    var idx;
-    do { idx = Math.floor(Math.random() * messages.length); } while (idx === lastMsg);
-    lastMsg = idx;
+  function showVerse() {
+    var v = verses[verseIdx];
+    verseIdx = (verseIdx + 1) % verses.length;
     bubble.classList.remove('show');
-    bubble.textContent = messages[idx];
-    void bubble.offsetWidth; // restart the pop animation
-    var bw = bubble.offsetWidth, bh = bubble.offsetHeight;
-    var vw = window.innerWidth, left, top;
-    if (vw <= 600) {            // toast, top-center
-      left = (vw - bw) / 2;
-      top = 64;
-    } else {                    // next to NO's new position
-      var r = noBtn.getBoundingClientRect();
-      left = clamp(r.left + r.width / 2 - bw / 2, MARGIN, vw - bw - MARGIN);
-      top = r.top - bh - 12;
-      if (top < MARGIN) top = r.bottom + 12;
+    verseText.textContent = v[0];
+    verseRef.textContent = v[1];
+    if (window.innerWidth <= 600) {
+      bubble.style.top = '16px';
+    } else {
+      bubble.style.top = (buttons.getBoundingClientRect().bottom + 16) + 'px';
     }
-    bubble.style.left = left + 'px';
-    bubble.style.top = top + 'px';
+    bubble.style.left = '50%';
+    void bubble.offsetWidth;
     bubble.classList.add('show');
     clearTimeout(bubbleTimer);
-    bubbleTimer = setTimeout(function () { bubble.classList.remove('show'); }, 1500);
+    bubbleTimer = setTimeout(function () { bubble.classList.remove('show'); }, 3000);
   }
 
-  function overlapsYes(x, y, w, h) {
-    var r = yesRect(), pad = 8;
-    return x < r.right + pad && x + w > r.left - pad && y < r.bottom + pad && y + h > r.top - pad;
-  }
-
-  function escapeNo(px, py) {
+  noBtn.addEventListener('click', function () {
     if (answered) return;
-    var now = Date.now();
-    if (now - lastEscape < 140) return;
-    lastEscape = now;
-    startMoving();
-    growYes(); // grow first so the overlap check uses YES's new size
-
-    var w = noBtn.offsetWidth, h = noBtn.offsetHeight;
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var minX = EDGE, minY = EDGE;
-    var maxX = Math.max(minX, vw - w - EDGE), maxY = Math.max(minY, vh - h - EDGE);
-    var curX = parseFloat(noBtn.style.left) || 0, curY = parseFloat(noBtn.style.top) || 0;
-    var cx = curX + w / 2, cy = curY + h / 2;
-    var small = vw <= 600;
-    var lo = small ? 60 : 80, hi = small ? 110 : 160;
-    var away = px != null ? Math.atan2(cy - py, cx - px) : Math.random() * Math.PI * 2;
-
-    function valid(x, y) {
-      return x >= minX && x <= maxX && y >= minY && y <= maxY && !overlapsYes(x, y, w, h);
-    }
-
-    var x = null, y = null, i, ang, d, nx, ny;
-    for (i = 0; i < 10; i++) {
-      // prefer directions away from the pointer; widen the spread on later attempts
-      var spread = px != null ? Math.min(Math.PI, 0.9 + i * 0.3) : Math.PI;
-      ang = away + (Math.random() * 2 - 1) * spread;
-      d = lo + Math.random() * (hi - lo);
-      nx = curX + Math.cos(ang) * d;
-      ny = curY + Math.sin(ang) * d;
-      if (valid(nx, ny)) { x = nx; y = ny; break; }
-    }
-    if (x === null) { // step toward the screen center
-      var tc = Math.atan2(vh / 2 - cy, vw / 2 - cx);
-      d = lo + Math.random() * (hi - lo);
-      nx = clamp(curX + Math.cos(tc) * d, minX, maxX);
-      ny = clamp(curY + Math.sin(tc) * d, minY, maxY);
-      if (valid(nx, ny)) { x = nx; y = ny; }
-    }
-    if (x === null) { // nearest uncovered corner / edge midpoint
-      var xs = [minX, (minX + maxX) / 2, maxX], ys = [minY, (minY + maxY) / 2, maxY];
-      var best = null, bestD = Infinity;
-      for (var a = 0; a < 3; a++) for (var b = 0; b < 3; b++) {
-        if (a === 1 && b === 1) continue;
-        if (overlapsYes(xs[a], ys[b], w, h)) continue;
-        var dd = Math.hypot(xs[a] - curX, ys[b] - curY);
-        if (dd < bestD) { bestD = dd; best = [xs[a], ys[b]]; }
-      }
-      if (best) { x = best[0]; y = best[1]; }
-      else { x = clamp(curX, minX, maxX); y = clamp(curY, minY, maxY); }
-    }
-
-    noBtn.style.setProperty('--rot', (Math.random() * 16 - 8).toFixed(1) + 'deg');
-    noBtn.style.left = x + 'px';
-    noBtn.style.top = y + 'px';
-    showBubble();
-  }
-
-  function keepNoInside() {
-    if (!moved || answered) return;
-    var w = noBtn.offsetWidth, h = noBtn.offsetHeight;
-    noBtn.style.left = clamp(parseFloat(noBtn.style.left) || 0, EDGE, Math.max(EDGE, window.innerWidth - w - EDGE)) + 'px';
-    noBtn.style.top = clamp(parseFloat(noBtn.style.top) || 0, EDGE, Math.max(EDGE, window.innerHeight - h - EDGE)) + 'px';
-  }
-
-  document.addEventListener('mousemove', function (e) {
-    if (answered) return;
-    var r = noBtn.getBoundingClientRect();
-    var dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
-    var dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
-    if (Math.hypot(dx, dy) < 60) escapeNo(e.clientX, e.clientY);
+    growYes();
+    showVerse();
   });
-  function block(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    var p = (e.touches && e.touches[0]) || e;
-    escapeNo(p.clientX, p.clientY);
-  }
-  noBtn.addEventListener('mousedown', block);
-  noBtn.addEventListener('click', block);
-  noBtn.addEventListener('touchstart', block, { passive: false });
-  noBtn.addEventListener('touchend', function (e) { e.preventDefault(); }, { passive: false });
-  noBtn.addEventListener('focus', function () { escapeNo(null, null); });
 
   /* ================= YES button growth ================= */
   var yesScale = 1;
 
   function maxScale() {
     var w = yesWrap.offsetWidth, h = yesWrap.offsetHeight;
-    return Math.max(1, Math.min(0.95 * window.innerWidth / w, 0.9 * window.innerHeight / h));
+    return Math.max(1, Math.min(0.9 * window.innerWidth / w, 0.85 * window.innerHeight / h));
   }
 
-  // Where YES will be once its transform settles (getBoundingClientRect lags mid-transition)
+  // Keep the grown button fully on screen
   function yesTransform() {
     var r = yesWrap.getBoundingClientRect();
     var w = r.width * yesScale, h = r.height * yesScale;
@@ -262,9 +170,8 @@
       tx = clamp(cx, w / 2 + 4, vw - w / 2 - 4) - cx;
       ty = clamp(cy, h / 2 + 4, vh - h / 2 - 4) - cy;
     }
-    return { tx: tx, ty: ty, left: cx + tx - w / 2, top: cy + ty - h / 2, right: cx + tx + w / 2, bottom: cy + ty + h / 2 };
+    return { tx: tx, ty: ty };
   }
-  function yesRect() { return yesTransform(); }
 
   function applyYes() {
     var t = yesTransform();
@@ -274,12 +181,11 @@
   }
 
   function growYes() {
-    yesScale = Math.min(yesScale + 0.25 + Math.random() * 0.1, maxScale());
+    yesScale = Math.min(yesScale * 1.18, maxScale());
     applyYes();
   }
 
   window.addEventListener('resize', function () {
-    keepNoInside();
     if (!answered) { yesScale = Math.min(yesScale, maxScale()); applyYes(); }
   });
   window.addEventListener('scroll', function () { if (!answered && yesScale > 1) applyYes(); }, { passive: true });
