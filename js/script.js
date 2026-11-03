@@ -295,5 +295,4 @@
     }, 200);
   }
 
-  $('printBtn').addEventListener('click', function () { window.print(); });
 })();

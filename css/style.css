@@ -18,7 +18,7 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 .music-btn:hover{background:var(--navy2)}
 .music-btn svg{width:22px;height:22px}
 .music-btn.nomusic{display:none}
-.music-btn:focus-visible,.btn-yes:focus-visible,.btn-no:focus-visible,.btn-print:focus-visible{outline:3px solid var(--text);outline-offset:3px}
+.music-btn:focus-visible,.btn-yes:focus-visible,.btn-no:focus-visible{outline:3px solid var(--text);outline-offset:3px}
 
 /* ---------- Welcome stage ---------- */
 .welcome{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;padding:70px 16px 40px;overflow:hidden;isolation:isolate;transition:opacity .6s}
@@ -134,11 +134,6 @@ h1{font-family:var(--serif);font-weight:700;text-transform:uppercase;letter-spac
 .sign-space{height:clamp(44px,9vw,72px)}
 .sig-name{font-weight:700;margin-bottom:0!important;letter-spacing:.04em}
 .sig-line{margin-bottom:0!important}
-.print-wrap{text-align:center;margin-top:38px;position:relative}
-.btn-print{display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:12px 34px;border-radius:6px;color:#14161b;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:.85rem;
-  background:var(--gold);box-shadow:0 8px 22px rgba(0,0,0,.4);transition:transform .2s,background .2s}
-.btn-print:hover{transform:translateY(-2px);background:#e2ba55}
-.btn-print svg{width:22px;height:22px}
 
 /* ---------- Footer ---------- */
 .footer{text-align:center;padding:26px 16px 30px;background:#08111d;color:var(--gold);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase}
@@ -161,17 +156,3 @@ h1{font-family:var(--serif);font-weight:700;text-transform:uppercase;letter-spac
   .letter-section{transition:none}
 }
 
-/* ---------- Print ---------- */
-@page{size:A4;margin:18mm}
-@media print{
-  html,body{background:#fff!important;color:#000!important;overflow:visible}
-  .welcome,.thanks,.footer,.print-wrap,.watermark,.music-btn,svg[width="0"]{display:none!important}
-  .paper-wrap::before{display:none}
-  .letter-section{display:block!important;opacity:1!important;transform:none!important;background:#fff!important;padding:0!important;overflow:visible}
-  .paper{box-shadow:none!important;background:#fff;width:100%;min-height:0!important;padding:0!important;color:#000;font-size:11pt;line-height:1.55;border-radius:0}
-  .paper p{margin-bottom:.8em}
-  .letter-head h2,.letter-head h3,.sig-name,.head-cross{color:#000}
-  .letter-head{margin-bottom:1.4em}
-  .sign-space{height:48px}
-  .paper,.signature{break-inside:avoid;page-break-inside:avoid}
-}
